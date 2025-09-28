@@ -1,5 +1,6 @@
 package com.cafepos.domain;
 import com.cafepos.common.money;
+import com.cafepos.payment.paymentStrategy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,5 +43,11 @@ public final class order {
 
     public money totalWithTax(int percent) {
         return subtotal().add(taxAtPercent(percent));
+    }
+
+    public void pay(paymentStrategy strategy) {
+        if (strategy == null)
+            throw new IllegalArgumentException("strategy required");
+        strategy.pay(this);
     }
 }
