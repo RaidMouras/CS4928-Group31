@@ -33,21 +33,17 @@ public class paymentTest {
     }
 
     @Test
-    public void payment_strategy_called() {
-        // Arrange
+    void payment_strategy_called() {
         var product = new simpleProduct("Coffee", "Freshly brewed", money.of(3.50));
         var order = new order(1);
         order.addItem(new lineItem(product, 1));
 
-        final boolean[] called = {false};
-        paymentStrategy fake = o -> called[0] = true;
-
-        // Act
+        fakePaymentStrategy fake = new fakePaymentStrategy();
         order.pay(fake);
 
-        // Assert
-        assertTrue(called[0], "Payment strategy should be called when paying an order");
+        assertTrue(fake.called, "Payment strategy should be called when paying an order");
     }
+
 
     @Test
     public void cash_payment_prints_expected_message() {
