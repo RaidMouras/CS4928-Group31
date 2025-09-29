@@ -14,7 +14,8 @@ public final class cardPayment implements paymentStrategy {
 
     @Override
     public void pay(order order) {
-        String maskedCard = "****" + cardNumber.substring(cardNumber.length() - 4);
+        String lastFour = cardNumber.substring(cardNumber.length() - 4);  //turn the number into a string, and extract the last 4 digits
+        String maskedCard = "****" + lastFour;
         System.out.println("[Card] Customer paid " + order.totalWithTax(10) + " EUR with card " + maskedCard);
     }
 }
