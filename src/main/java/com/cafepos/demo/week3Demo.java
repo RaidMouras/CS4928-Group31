@@ -9,6 +9,7 @@ import com.cafepos.domain.orderIds;
 import com.cafepos.domain.simpleProduct;
 import com.cafepos.payment.cardPayment;
 import com.cafepos.payment.cashPayment;
+import com.cafepos.payment.walletPayment;
 
 public final class week3Demo {
     public static void main(String[] args) {

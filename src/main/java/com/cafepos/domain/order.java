@@ -1,14 +1,17 @@
 package com.cafepos.domain;
 import com.cafepos.common.money;
+import com.cafepos.observer.OrderObserver;
+import com.cafepos.observer.OrderPublisher;
 import com.cafepos.payment.paymentStrategy;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class order {
+public final class order implements OrderPublisher {
     private final long id;
     private final List<lineItem> items = new ArrayList<>();
+    private final List<OrderObserver> observers = new ArrayList<>();
 
     public order(long id) { // setter
         if (id <= 0)
@@ -20,6 +23,28 @@ public final class order {
         return id;
     }
 
+    @Override
+    public void register(OrderObserver o) {
+        if (o == null) throw new IllegalArgumentException("observer required");
+        if (!observers.contains(o)) observers.add(o);
+    }
+
+    @Override
+    public void unregister(OrderObserver o) {
+        observers.remove(o);
+    }
+
+    @Override
+    public void notifyObservers(order order, String eventType) {
+
+    }
+
+    private void notifyObservers(String eventType) {
+        for (OrderObserver o : observers) {
+            o.updated(this, eventType);
+        }
+    }
+
     public List<lineItem> items() {
         return Collections.unmodifiableList(items);
     }
@@ -28,6 +53,7 @@ public final class order {
         if (li == null)
             throw new IllegalArgumentException("line item required");
         items.add(li);
+        notifyObservers("itemAdded");
     }
 
     public money subtotal() {
@@ -49,5 +75,10 @@ public final class order {
         if (strategy == null)
             throw new IllegalArgumentException("strategy required");
         strategy.pay(this);
+        notifyObservers("paid");
+    }
+
+    public void markReady() {
+        notifyObservers("ready");
     }
 }
