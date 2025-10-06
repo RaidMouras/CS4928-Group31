@@ -34,12 +34,8 @@ public final class order implements OrderPublisher {
         observers.remove(o);
     }
 
-    @Override
-    public void notifyObservers(order order, String eventType) {
 
-    }
-
-    private void notifyObservers(String eventType) {
+    public void notifyObservers(String eventType) {
         for (OrderObserver o : observers) {
             o.updated(this, eventType);
         }
