@@ -1,4 +1,5 @@
 package com.cafepos.domain;
+import com.cafepos.catalog.Priced;
 import com.cafepos.common.money;
 
 public final class lineItem {
@@ -14,15 +15,18 @@ public final class lineItem {
         this.quantity = quantity;
     }
 
+
     public product product() {
+
         return product;
     }
 
     public int quantity() {
+
         return quantity;
     }
 
     public money lineTotal() {
-        return product.basePrice().multiply(quantity);
-    }
-}
+        money unit = (product instanceof Priced p) ? p.price() : product.basePrice();
+        return unit.multiply(quantity);
+    }}

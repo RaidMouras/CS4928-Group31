@@ -1,7 +1,8 @@
 package com.cafepos.domain;
+import com.cafepos.catalog.Priced;
 import com.cafepos.common.money;
 
-public final class simpleProduct implements product {
+public final class simpleProduct implements product, Priced {
     private final String id;
     private final String name;
     private final money basePrice;
@@ -30,6 +31,11 @@ public final class simpleProduct implements product {
 
     @Override
     public money basePrice() {
+        return basePrice;
+    }
+
+    @Override
+    public money price() {
         return basePrice;
     }
 }

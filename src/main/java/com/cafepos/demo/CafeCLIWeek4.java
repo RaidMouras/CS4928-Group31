@@ -17,7 +17,7 @@ import com.cafepos.payment.paymentStrategy;
 
 import java.util.Scanner;
 
-public final class CafeCLI {
+public final class CafeCLIWeek4 {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
