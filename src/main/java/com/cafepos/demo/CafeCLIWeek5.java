@@ -56,6 +56,7 @@ public static void main(String[] args) {
         }
     }
 
+
     // Display order summary
     System.out.println("\n=== Order Summary ===");
     for (lineItem li : items) {

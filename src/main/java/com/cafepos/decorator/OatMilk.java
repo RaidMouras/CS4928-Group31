@@ -4,8 +4,10 @@ import com.cafepos.catalog.Priced;
 import com.cafepos.common.money;
 import com.cafepos.domain.product;
 
+import java.math.BigDecimal;
+
 public final class OatMilk extends ProductDecorator {
-    private static final money SURCHARGE = money.of(0.50);
+    private static final money SURCHARGE = money.of(BigDecimal.valueOf(0.50));
     public OatMilk(product base) { super(base); }
     @Override public String name() { return base.name() + " + Oat Milk"; }
     @Override public money price() {

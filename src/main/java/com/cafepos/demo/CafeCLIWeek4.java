@@ -15,6 +15,7 @@ import com.cafepos.payment.cardPayment;
 import com.cafepos.payment.walletPayment;
 import com.cafepos.payment.paymentStrategy;
 
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 public final class CafeCLIWeek4 {
@@ -23,10 +24,10 @@ public final class CafeCLIWeek4 {
 
         // Setup product catalog with IDs and prices
         catalog catalog = new inMemoryCatalog();
-        catalog.add(new simpleProduct("P1", "Cookie", money.of(1.50)));
-        catalog.add(new simpleProduct("P2", "Espresso", money.of(2.50)));
-        catalog.add(new simpleProduct("P3", "Brownie", money.of(2.00)));
-        catalog.add(new simpleProduct("P4", "Hot Chocolate", money.of(2.80)));
+        catalog.add(new simpleProduct("P1", "Cookie", money.of(BigDecimal.valueOf(1.50))));
+        catalog.add(new simpleProduct("P2", "Espresso", money.of(BigDecimal.valueOf(2.50))));
+        catalog.add(new simpleProduct("P3", "Brownie", money.of(BigDecimal.valueOf(2.00))));
+        catalog.add(new simpleProduct("P4", "Hot Chocolate", money.of(BigDecimal.valueOf(2.80))));
 
         System.out.println("Welcome to the Café!");
         System.out.println("Menu:");

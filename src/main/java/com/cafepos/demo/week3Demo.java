@@ -11,11 +11,13 @@ import com.cafepos.payment.cardPayment;
 import com.cafepos.payment.cashPayment;
 import com.cafepos.payment.walletPayment;
 
+import java.math.BigDecimal;
+
 public final class week3Demo {
     public static void main(String[] args) {
         catalog catalog = new inMemoryCatalog();
-        catalog.add(new simpleProduct("P-ESP", "Espresso", money.of(2.50)));
-        catalog.add(new simpleProduct("P-CCK", "Chocolate Cookie", money.of(3.50)));
+        catalog.add(new simpleProduct("P-ESP", "Espresso", money.of(BigDecimal.valueOf(2.50))));
+        catalog.add(new simpleProduct("P-CCK", "Chocolate Cookie", money.of(BigDecimal.valueOf(3.50))));
 
 // Cash payment
         order order1 = new order(orderIds.next());

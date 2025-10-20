@@ -8,6 +8,8 @@ import com.cafepos.decorator.Syrup;
 import com.cafepos.domain.product;
 import com.cafepos.domain.simpleProduct;
 
+import java.math.BigDecimal;
+
 public final class ProductFactory {
     public product create(String recipe) {
         if (recipe == null || recipe.isBlank())
@@ -19,9 +21,9 @@ public final class ProductFactory {
                 .toArray(String[]::new);
 
         product p = switch (parts[0]) {
-            case "ESP" -> new simpleProduct("P-ESP", "Espresso", money.of(2.50));
-            case "LAT" -> new simpleProduct("P-LAT", "Latte", money.of(3.20));
-            case "CAP" -> new simpleProduct("P-CAP", "Cappuccino", money.of(3.00));
+            case "ESP" -> new simpleProduct("P-ESP", "Espresso", money.of(BigDecimal.valueOf(2.50)));
+            case "LAT" -> new simpleProduct("P-LAT", "Latte", money.of(BigDecimal.valueOf(3.20)));
+            case "CAP" -> new simpleProduct("P-CAP", "Cappuccino", money.of(BigDecimal.valueOf(3.00)));
             default -> throw new IllegalArgumentException("Unknown base: " + parts[0]);
         };
 

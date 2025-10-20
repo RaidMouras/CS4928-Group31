@@ -12,10 +12,12 @@ import com.cafepos.observer.DeliveryDesk;
 import com.cafepos.observer.KitchenDisplay;
 import com.cafepos.payment.cashPayment;
 
+import java.math.BigDecimal;
+
 public final class week4Demo {
     public static void main(String[] args) {
         catalog catalog = new inMemoryCatalog();
-        catalog.add(new simpleProduct("P-ESP", "Espresso", money.of(2.50)));
+        catalog.add(new simpleProduct("P-ESP", "Espresso", money.of(BigDecimal.valueOf(2.50))));
         order order = new order(orderIds.next());
         order.register(new KitchenDisplay());
         order.register(new DeliveryDesk());

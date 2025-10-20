@@ -8,11 +8,11 @@ public final class money implements Comparable<money> {
 
     private final BigDecimal amount;
 
-    public static money of(double value) {
-        if (value < 0) {
+    public static money of(BigDecimal value) {
+        if (value.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Value must be positive");
         }
-        return new money(BigDecimal.valueOf(value));
+        return new money(value);
     }
 
     public static money zero() {
@@ -52,6 +52,15 @@ public final class money implements Comparable<money> {
             return false; //check null and class type
         money money = (money) o;
         return amount.compareTo(money.amount) == 0; // Compare by VALUE
+    }
+
+    public BigDecimal amount() {
+        return amount;
+    }
+
+    //for smelly implementation
+    public BigDecimal asBigDecimal() {
+        return amount;
     }
 
     @Override
