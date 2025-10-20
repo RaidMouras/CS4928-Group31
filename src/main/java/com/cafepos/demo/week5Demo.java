@@ -4,7 +4,7 @@ import com.cafepos.Factory.ProductFactory;
 import com.cafepos.domain.lineItem;
 import com.cafepos.domain.order;
 import com.cafepos.domain.orderIds;
-import com.cafepos.domain.product;
+import com.cafepos.catalog.product;
 
 public final class week5Demo {
     public static void main(String[] args) {

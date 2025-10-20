@@ -1,8 +1,7 @@
 package com.cafepos.smells;
-
-import com.cafepos.Factory.ProductFactory;
 import com.cafepos.common.money;
-import com.cafepos.domain.product;
+import com.cafepos.Factory.ProductFactory;
+import com.cafepos.catalog.product;
 
 import java.math.BigDecimal;
 
@@ -42,7 +41,9 @@ public class OrderManagerGod {
                 money.of(subtotal.asBigDecimal().subtract(discount.asBigDecimal()));
         if (discounted.asBigDecimal().signum() < 0) discounted =
                 money.zero();
-        var tax = money.of(discounted.asBigDecimal().multiply(java.math.BigDecimal.valueOf(TAX_PERCENT)).divide(java.math.BigDecimal.valueOf(100)));
+        var tax = money.of(discounted.asBigDecimal()
+                .multiply(java.math.BigDecimal.valueOf(TAX_PERCENT))
+                .divide(java.math.BigDecimal.valueOf(100)));
         var total = discounted.add(tax);
         if (paymentType != null) {
             if (paymentType.equalsIgnoreCase("CASH")) {
@@ -56,12 +57,12 @@ public class OrderManagerGod {
             }
         }
         StringBuilder receipt = new StringBuilder();
-        receipt.append("Order (").append(recipe).append(")x").append(qty).append("\n");
+        receipt.append("Order (").append(recipe).append(") x").append(qty).append("\n");
                 receipt.append("Subtotal: ").append(subtotal).append("\n");
         if (discount.asBigDecimal().signum() > 0) {
             receipt.append("Discount: -").append(discount).append("\n");
         }
-        receipt.append("Tax (").append(TAX_PERCENT).append("%): ").append(tax).append("\n");
+        receipt.append("Tax (").append(TAX_PERCENT).append("%):").append(tax).append("\n");
                 receipt.append("Total: ").append(total);
         String out = receipt.toString();
         if (printReceipt) {
@@ -69,4 +70,4 @@ public class OrderManagerGod {
         }
         return out;
     }
-} 
+}

@@ -2,7 +2,7 @@ package com.cafepos;
 
 import com.cafepos.common.money;
 import com.cafepos.domain.lineItem;
-import com.cafepos.domain.product;
+import com.cafepos.catalog.product;
 import com.cafepos.domain.simpleProduct;
 import org.junit.Test;
 

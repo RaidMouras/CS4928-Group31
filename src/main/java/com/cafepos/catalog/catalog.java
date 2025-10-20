@@ -1,5 +1,4 @@
 package com.cafepos.catalog;
-import com.cafepos.domain.product;
 
 import java.util.Optional;
 

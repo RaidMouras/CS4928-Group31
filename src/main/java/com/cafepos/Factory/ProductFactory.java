@@ -5,7 +5,7 @@ import com.cafepos.decorator.ExtraShot;
 import com.cafepos.decorator.OatMilk;
 import com.cafepos.decorator.SizeLarge;
 import com.cafepos.decorator.Syrup;
-import com.cafepos.domain.product;
+import com.cafepos.catalog.product;
 import com.cafepos.domain.simpleProduct;
 
 import java.math.BigDecimal;

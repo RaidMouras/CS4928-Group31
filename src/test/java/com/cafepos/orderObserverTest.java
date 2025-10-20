@@ -1,5 +1,6 @@
 package com.cafepos;
 
+import com.cafepos.catalog.product;
 import com.cafepos.common.money;
 import com.cafepos.domain.*;
 import org.junit.jupiter.api.Test;

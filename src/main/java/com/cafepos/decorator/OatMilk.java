@@ -1,8 +1,7 @@
 package com.cafepos.decorator;
 
-import com.cafepos.catalog.Priced;
 import com.cafepos.common.money;
-import com.cafepos.domain.product;
+import com.cafepos.catalog.product;
 
 import java.math.BigDecimal;
 

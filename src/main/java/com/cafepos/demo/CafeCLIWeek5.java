@@ -4,7 +4,7 @@ import com.cafepos.Factory.ProductFactory;
 import com.cafepos.domain.lineItem;
 import com.cafepos.domain.order;
 import com.cafepos.domain.orderIds;
-import com.cafepos.domain.product;
+import com.cafepos.catalog.product;
 import com.cafepos.payment.cardPayment;
 import com.cafepos.payment.cashPayment;
 import com.cafepos.payment.paymentStrategy;

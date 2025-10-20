@@ -1,14 +1,13 @@
 package com.cafepos;
 
 import com.cafepos.common.money;
-import com.cafepos.catalog.Priced;
+import com.cafepos.decorator.Priced;
 import com.cafepos.domain.lineItem;
 import com.cafepos.domain.order;
 import com.cafepos.domain.simpleProduct;
-import com.cafepos.domain.product;
+import com.cafepos.catalog.product;
 import com.cafepos.decorator.ExtraShot;
 import com.cafepos.decorator.OatMilk;
-import com.cafepos.decorator.Syrup;
 import com.cafepos.decorator.SizeLarge;
 import com.cafepos.Factory.ProductFactory;
 

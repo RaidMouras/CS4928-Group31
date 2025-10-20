@@ -1,9 +1,8 @@
 package com.cafepos.decorator;
 
 
-import com.cafepos.catalog.Priced;
 import com.cafepos.common.money;
-import com.cafepos.domain.product;
+import com.cafepos.catalog.product;
 
 public abstract class ProductDecorator implements product, Priced {
     protected final product base;
