@@ -1,7 +1,5 @@
 package com.cafepos.decorator;
 
-import com.cafepos.common.money;
+import com.cafepos.common.Money;
 
-public interface Priced {
-    money price();
-}
+public interface Priced { Money price(); }

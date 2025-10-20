@@ -1,17 +1,11 @@
 package com.cafepos.decorator;
 
+import com.cafepos.catalog.Product;
+import com.cafepos.common.Money;
 
-import com.cafepos.common.money;
-import com.cafepos.catalog.product;
-
-public abstract class ProductDecorator implements product, Priced {
-    protected final product base;
-
-    protected ProductDecorator(product base) {
-        if (base == null) throw new IllegalArgumentException("base product required");
-        this.base = base;
-    }
-
+public abstract class ProductDecorator implements Product, Priced {
+    protected final Product base;
+    protected ProductDecorator(Product base) { if (base == null) throw new IllegalArgumentException("base required"); this.base = base; }
     @Override public String id() { return base.id(); }
-    @Override public money basePrice() { return base.basePrice(); }
+    @Override public Money basePrice() { return base.basePrice(); }
 }

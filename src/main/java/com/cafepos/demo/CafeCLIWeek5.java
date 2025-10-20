@@ -1,10 +1,10 @@
 package com.cafepos.demo;
 
-import com.cafepos.Factory.ProductFactory;
-import com.cafepos.domain.lineItem;
-import com.cafepos.domain.order;
-import com.cafepos.domain.orderIds;
-import com.cafepos.catalog.product;
+import com.cafepos.domain.LineItem;
+import com.cafepos.domain.Order;
+import com.cafepos.domain.OrderIds;
+import com.cafepos.factory.ProductFactory;
+import com.cafepos.catalog.Product;
 import com.cafepos.payment.cardPayment;
 import com.cafepos.payment.cashPayment;
 import com.cafepos.payment.paymentStrategy;
@@ -18,8 +18,8 @@ public final class CafeCLIWeek5 {
 public static void main(String[] args) {
     Scanner scanner = new Scanner(System.in);
     ProductFactory factory = new ProductFactory();
-    order order = new order(orderIds.next());
-    List<lineItem> items = new ArrayList<>();
+    Order order = new Order(OrderIds.next());
+    List<LineItem> items = new ArrayList<>();
 
     System.out.println("=== Café POS System (Week 5 Interactive CLI) ===");
     System.out.println("Enter drink codes to build your order.");
@@ -42,11 +42,11 @@ public static void main(String[] args) {
         if (input.equalsIgnoreCase("done")) break;
 
         try {
-            product product = factory.create(input);
+            Product product = factory.create(input);
             System.out.print("Quantity: ");
             int qty = Integer.parseInt(scanner.nextLine().trim());
 
-            lineItem item = new lineItem(product, qty);
+            LineItem item = new LineItem(product, qty);
             order.addItem(item);
             items.add(item);
             System.out.println("Added: " + product.name() + " x" + qty + "\n");
@@ -59,9 +59,8 @@ public static void main(String[] args) {
 
     // Display order summary
     System.out.println("\n=== Order Summary ===");
-    for (lineItem li : items) {
-        System.out.println(" - " + li.product().name() + " x" + li.quantity()
-                + " = " + li.lineTotal());
+    for (LineItem li : items) {
+        System.out.println(" - " + li.product().name() + " x" + li.quantity()+ " = " + li.lineTotal());
     }
     System.out.println("-----------------------------");
     System.out.println("Subtotal: " + order.subtotal());

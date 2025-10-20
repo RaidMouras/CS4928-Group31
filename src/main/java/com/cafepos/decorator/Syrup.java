@@ -1,16 +1,11 @@
 package com.cafepos.decorator;
 
-import com.cafepos.common.money;
-import com.cafepos.catalog.product;
-
-import java.math.BigDecimal;
+import com.cafepos.catalog.Product;
+import com.cafepos.common.Money;
 
 public final class Syrup extends ProductDecorator {
-    private static final money SURCHARGE = money.of(BigDecimal.valueOf(0.40));
-    public Syrup(product base) { super(base); }
+    private static final Money SURCHARGE = Money.of(0.40);
+    public Syrup(Product base) { super(base); }
     @Override public String name() { return base.name() + " + Syrup"; }
-    @Override public money price() {
-        money basePrice = (base instanceof Priced p) ? p.price() : base.basePrice();
-        return basePrice.add(SURCHARGE);
-    }
+    @Override public Money price() { return (base instanceof Priced p ? p.price() : base.basePrice()).add(SURCHARGE); }
 }
