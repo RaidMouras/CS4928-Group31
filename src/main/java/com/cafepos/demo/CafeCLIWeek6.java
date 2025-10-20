@@ -77,15 +77,15 @@ public final class CafeCLIWeek6 {
     }
 
     private static String promptDiscountCode(Scanner scanner) {
-        System.out.println("Enter discount code (e.g., LOYAL5 for 5% off, SAVE10 for $10 off, blank for none):");
+        System.out.println("Enter discount code (e.g., LOYAL5 for 5% off, SAVE10 for $3 off, blank for none):");
         return scanner.nextLine().trim();
     }
 
     private static DiscountPolicy selectDiscountPolicy(String code) {
         if (code.equalsIgnoreCase("LOYAL5")) {
             return new LoyaltyPercentDiscount(5);
-        } else if (code.equalsIgnoreCase("SAVE10")) {
-            return new FixedCouponDiscount(money.of(BigDecimal.valueOf(10.0)));
+        } else if (code.equalsIgnoreCase("SAVE3")) {
+            return new FixedCouponDiscount(money.of(BigDecimal.valueOf(3.0)));
         } else {
             return new NoDiscount();
         }
