@@ -3,7 +3,6 @@ package com.cafepos.receipt;
 import com.cafepos.common.Money;
 
 public final class ReceiptPrinter {
-
     public String build(String recipe,
                         int qty,
                         Money subtotal,
@@ -33,9 +32,7 @@ public final class ReceiptPrinter {
                                      Money total,
                                      boolean printReceipt) {
         String out = build(recipe, qty, subtotal, showDiscountLine, discount, taxPercent, tax, total);
-        if (printReceipt) {
-            System.out.println(out);
-        }
+        if (printReceipt) System.out.println(out);
         return out;
     }
 }

@@ -1,69 +1,84 @@
 package com.cafepos.smells;
 
 import com.cafepos.common.Money;
-import com.cafepos.factory.ProductFactory;
 import com.cafepos.catalog.Product;
-import com.cafepos.payment.Payments;
-import com.cafepos.payment.paymentStrategy;
-import com.cafepos.pricing.DiscountPolicies;
-import com.cafepos.pricing.DiscountPolicy;
-import com.cafepos.pricing.PercentTaxPolicy;
+import com.cafepos.factory.ProductFactory;
+import com.cafepos.pricing.PricingService;
 import com.cafepos.pricing.TaxPolicy;
 import com.cafepos.receipt.ReceiptPrinter;
+import com.cafepos.payment.paymentStrategy;
+import com.cafepos.payment.Payments;
 
 public class OrderManagerGod {
 
-    public static int TAX_PERCENT = 10; // Global/Static State: TAX_PERCENT is a mutable global primitive — risky and hard to test.
-    public static String LAST_DISCOUNT_CODE = null; // Global/Static State: LAST_DISCOUNT_CODE is global — risky and hard to test.
+    private final ProductFactory factory;
+    private final PricingService pricing;   // composes DiscountPolicy + TaxPolicy
+    private final ReceiptPrinter printer;
+    private final paymentStrategy paymentOrNull; // optional injected payment
+    private final boolean useInjectedPayment;
+    private final TaxPolicy taxPolicy;      // keep a reference for labeling
 
-    public static String process(String recipe, int qty, String
-            paymentType, String discountCode, boolean printReceipt) {
-        // God Class & Long Method: One method performs creation, pricing, discounting, tax, payment I/O, and printing.
-        ProductFactory factory = new ProductFactory(); // Feature Envy / Shotgun Surgery: Creation concerns embedded here; changes require editing this method.
-        Product product = factory.create(recipe);      // Feature Envy / Shotgun Surgery: Product construction rules live here; edits ripple here.
+    public OrderManagerGod(ProductFactory factory,
+                           com.cafepos.pricing.DiscountPolicy discountPolicy,
+                           TaxPolicy taxPolicy,
+                           ReceiptPrinter printer,
+                           paymentStrategy paymentStrategy) {
+        this.factory = factory;
+        this.pricing = new PricingService(discountPolicy, taxPolicy);
+        this.printer = printer;
+        this.paymentOrNull = paymentStrategy;
+        this.useInjectedPayment = (paymentStrategy != null);
+        this.taxPolicy = taxPolicy;
+    }
+
+    // If tests still call static OrderManagerGod.process(...), keep a static wrapper temporarily:
+    public static String process(String recipe, int qty, String paymentType, String discountCode, boolean printReceipt) {
+        // Transitional compatibility: choose policies here without globals.
+        var factory = new com.cafepos.factory.ProductFactory();
+        var discountPolicy = com.cafepos.pricing.DiscountPolicies.fromCode(discountCode);
+        var taxPolicy = new com.cafepos.pricing.PercentTaxPolicy(10); // configure percent here, not globally
+        var printer = new com.cafepos.receipt.ReceiptPrinter();
+        var omg = new OrderManagerGod(factory, discountPolicy, taxPolicy, printer, null);
+        return omg.processInstance(recipe, qty, paymentType, discountCode, printReceipt);
+    }
+
+    // Instance version used by DI code; no globals referenced.
+    public String processInstance(String recipe, int qty, String paymentType, String discountCode, boolean printReceipt) {
+        Product product = factory.create(recipe);
 
         Money unitPrice;
         try {
-            var priced = product instanceof com.cafepos.decorator.Priced
-                    p ? p.price() : product.basePrice(); // Duplicated Logic: Pricing selection and branching done inline with domain details.
+            var priced = product instanceof com.cafepos.decorator.Priced p ? p.price() : product.basePrice();
             unitPrice = priced;
         } catch (Exception e) {
-            unitPrice = product.basePrice(); // Duplicated Logic: Repeated fallback pricing logic inline.
+            unitPrice = product.basePrice();
         }
 
-        if (qty <= 0) qty = 1; // Primitive Obsession: business rule on primitive qty; no Quantity type.
+        if (qty <= 0) qty = 1;
 
-        Money subtotal = unitPrice.multiply(qty); // Duplicated Logic: Money math performed inline.
+        Money subtotal = unitPrice.multiply(qty);
 
-        DiscountPolicy dPolicy = DiscountPolicies.fromCode(discountCode);
-        if (discountCode != null) { // preserve legacy side effect behavior
-            LAST_DISCOUNT_CODE = dPolicy.code();
-        }
-        Money discount = dPolicy.discount(subtotal);
+        // No LAST_DISCOUNT_CODE mutation here anymore.
 
-        Money discounted =
-                Money.of(subtotal.asBigDecimal().subtract(discount.asBigDecimal())); // Duplicated Logic: BigDecimal math inline.
-        if (discounted.asBigDecimal().signum() < 0) discounted =
-                Money.zero(); // Duplicated Logic: rule and guard logic inline.
+        var pr = pricing.price(subtotal);
 
-        TaxPolicy tPolicy = new PercentTaxPolicy(TAX_PERCENT);
-        Money tax = tPolicy.tax(discounted);
-        Money total = discounted.add(tax);
+        paymentStrategy pay = useInjectedPayment ? paymentOrNull : Payments.of(paymentType);
+        pay.pay(pr.total());
 
-        paymentStrategy payment = Payments.of(paymentType);
-        payment.pay(total);
+        boolean showDiscountLine = pr.discount().asBigDecimal().signum() > 0;
 
-        ReceiptPrinter printer = new ReceiptPrinter();
-        boolean showDiscountLine = dPolicy.printsLine(discount);
+        // Derive the percent for the label from the injected TaxPolicy
+        int percentForLabel = (taxPolicy instanceof com.cafepos.pricing.PercentTaxPolicy p) ? p.percent() : 10;
+
         return printer.buildAndMaybePrint(
                 recipe,
                 qty,
-                subtotal,
+                pr.subtotal(),
                 showDiscountLine,
-                discount,
-                TAX_PERCENT, // keep exact label percent
-                tax,
-                total,
+                pr.discount(),
+                percentForLabel,     // no TAX_PERCENT global
+                pr.tax(),
+                pr.total(),
                 printReceipt
         );
     }

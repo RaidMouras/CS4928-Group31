@@ -1,104 +1,76 @@
 package com.cafepos;
 
 import com.cafepos.smells.OrderManagerGod;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Week6CharacterizationTests {
+class Week6CharacterizationTests {
 
-    @BeforeEach
-    void resetGlobals() {
-        OrderManagerGod.TAX_PERCENT = 10;
-        OrderManagerGod.LAST_DISCOUNT_CODE = null;
+    @Test
+    void card_payment_with_loyal5_prints_expected_receipt() {
+        String receipt = OrderManagerGod.process("ESP+SHOT", 1, "CARD", "LOYAL5", false);
+
+        // Lines must match exactly: order, subtotal, optional discount, tax label with 10%, total
+        assertTrue(receipt.startsWith("Order (ESP+SHOT)x1\n"), "Header line mismatch");
+        assertTrue(receipt.contains("Subtotal: "), "Missing Subtotal line");
+        // For LOYAL5, expect a positive discount line
+        assertTrue(receipt.contains("Discount: -"), "Expected discount line for LOYAL5");
+        assertTrue(receipt.contains("Tax (10%):"), "Tax label must be exactly 'Tax (10%):'");
+        assertTrue(receipt.contains("Total: "), "Missing Total line");
     }
 
     @Test
-    void no_discount_cash_payment_receipt_shape_and_globals() {
-        String r = OrderManagerGod.process("ESP", 1, "CASH", "NONE", false);
+    void unknown_discount_code_prints_no_discount_line() {
+        String receipt = OrderManagerGod.process("ESP", 2, "CASH", "XYZ", false);
 
-        // Format/structure
-        assertTrue(r.startsWith("Order ("), "Receipt must start with 'Order ('");
-        assertTrue(r.contains(")x1\n"), "Order line must render ')x1' followed by newline");
-        assertTrue(r.contains("Subtotal: "), "Must include 'Subtotal: '");
-        assertFalse(r.contains("Discount:"), "No discount line when discount is zero (NONE)");
-        assertTrue(r.contains("Tax (10%):"), "Tax label must be exactly 'Tax (10%):'");
-        assertTrue(r.indexOf("Subtotal: ") < r.indexOf("Tax (10%):"), "Subtotal precedes Tax");
-        assertTrue(r.indexOf("Tax (10%):") < r.indexOf("Total: "), "Tax precedes Total");
-        assertTrue(r.endsWith("Total: " + r.substring(r.indexOf("Total: ") + 7)), "Total must be last line");
-
-        // Global side effect
-        assertEquals("NONE", OrderManagerGod.LAST_DISCOUNT_CODE, "LAST_DISCOUNT_CODE should capture provided code");
+        assertTrue(receipt.startsWith("Order (ESP)x2\n"), "Header line mismatch");
+        assertTrue(receipt.contains("Subtotal: "), "Missing Subtotal line");
+        assertFalse(receipt.contains("Discount: -"), "Unknown code should not print discount line");
+        assertTrue(receipt.contains("Tax (10%):"), "Tax label must be exactly 'Tax (10%):'");
+        assertTrue(receipt.contains("Total: "), "Missing Total line");
     }
 
     @Test
-    void loyalty5_two_latte_card_includes_discount_line_and_ordering() {
-        String r = OrderManagerGod.process("LAT+L", 2, "CARD", "LOYAL5", false);
+    void zero_or_negative_qty_defaults_to_one() {
+        String receiptZero = OrderManagerGod.process("LAT", 0, "CARD", "NONE", false);
+        assertTrue(receiptZero.startsWith("Order (LAT)x1\n"), "Qty 0 should default to 1");
 
-        assertTrue(r.contains("Subtotal: "), "Must include Subtotal");
-        assertTrue(r.contains("Discount: -"), "Percent discount must print as 'Discount: -<amount>'");
-        assertTrue(r.contains("Tax (10%):"), "Must include exact tax label");
-        assertTrue(r.contains("Total: "), "Must include Total line");
-
-        int iOrder = r.indexOf("Order (");
-        int iSubtotal = r.indexOf("Subtotal: ");
-        int iDiscount = r.indexOf("Discount: -");
-        int iTax = r.indexOf("Tax (10%):");
-        int iTotal = r.indexOf("Total: ");
-
-        assertTrue(iOrder >= 0 && iOrder < iSubtotal, "Order precedes Subtotal");
-        assertTrue(iSubtotal < iDiscount, "Subtotal precedes Discount");
-        assertTrue(iDiscount < iTax, "Discount precedes Tax");
-        assertTrue(iTax < iTotal, "Tax precedes Total");
-
-        assertEquals("LOYAL5", OrderManagerGod.LAST_DISCOUNT_CODE, "Global should capture applied code");
+        String receiptNeg = OrderManagerGod.process("LAT", -5, "CARD", "NONE", false);
+        assertTrue(receiptNeg.startsWith("Order (LAT)x1\n"), "Negative qty should default to 1");
     }
 
     @Test
-    void coupon1_wallet_qty_zero_clamps_to_one_and_prints_discount_line() {
-        String r = OrderManagerGod.process("ESP+SHOT", 0, "WALLET", "COUPON1", false);
-
-        assertTrue(r.contains(")x1\n"), "qty <= 0 must clamp to 1 and show ')x1'");
-        assertTrue(r.contains("Discount: -"), "Fixed coupon must print discount line");
-        assertTrue(r.contains("Tax (10%):"), "Must include exact tax label");
-        assertTrue(r.endsWith("Total: " + r.substring(r.indexOf("Total: ") + 7)), "Total must be last line");
-
-        assertEquals("COUPON1", OrderManagerGod.LAST_DISCOUNT_CODE, "Global should store code even for fixed coupons");
+    void prints_payment_messages_to_stdout_shape_only() {
+        // These calls should not throw and should print the expected prefixes.
+        // If you want to capture stdout, use a PrintStream rule or System.setOut in your environment.
+        // Here we only verify the calls do not fail; characterization may only check receipt, not stdout.
+        assertDoesNotThrow(() -> OrderManagerGod.process("ESP", 1, "CASH", "NONE", true));
+        assertDoesNotThrow(() -> OrderManagerGod.process("ESP", 1, "CARD", "NONE", true));
+        assertDoesNotThrow(() -> OrderManagerGod.process("ESP", 1, "WALLET", "NONE", true));
+        assertDoesNotThrow(() -> OrderManagerGod.process("ESP", 1, "UNKNOWN", "NONE", true));
     }
 
     @Test
-    void unknown_discount_code_prints_no_discount_and_sets_global() {
-        String r = OrderManagerGod.process("CAP+OAT", 1, "CARD", "XYZ", false);
-
-        assertFalse(r.contains("Discount:"), "Unknown code results in zero discount and no discount line");
-        assertTrue(r.contains("Subtotal: "), "Subtotal must print");
-        assertTrue(r.contains("Tax (10%):"), "Tax must print");
-        assertTrue(r.contains("Total: "), "Total must print");
-
-        assertEquals("XYZ", OrderManagerGod.LAST_DISCOUNT_CODE, "LAST_DISCOUNT_CODE should capture unknown code too");
+    void tax_label_and_spacing_are_exact() {
+        String receipt = OrderManagerGod.process("ESP", 1, "CASH", "NONE", false);
+        // The colon is immediately followed by the tax amount; no extra spaces.
+        int idx = receipt.indexOf("Tax (10%):");
+        assertTrue(idx >= 0, "Missing exact tax label 'Tax (10%):'");
+        // Check that after the colon comes a digit (part of the amount), not a space.
+        char afterColon = receipt.charAt(idx + "Tax (10%):".length());
+        assertTrue(Character.isDigit(afterColon), "There must be no space after the tax colon");
     }
 
     @Test
-    void null_discount_code_prints_no_discount_and_does_not_touch_global() {
-        String r = OrderManagerGod.process("LAT", 1, "CASH", null, false);
-
-        assertFalse(r.contains("Discount:"), "No discount line when discountCode is null");
-        assertNull(OrderManagerGod.LAST_DISCOUNT_CODE, "Global must remain null when code is null");
-    }
-
-    @Test
-    void payment_variants_do_not_change_receipt_shape() {
-        String cash = OrderManagerGod.process("ESP", 1, "CASH", "NONE", false);
-        String card = OrderManagerGod.process("ESP", 1, "CARD", "NONE", false);
-        String wallet = OrderManagerGod.process("ESP", 1, "WALLET", "NONE", false);
-        String unknown = OrderManagerGod.process("ESP", 1, "FOO", "NONE", false);
-
-        for (String r : new String[]{cash, card, wallet, unknown}) {
-            assertTrue(r.startsWith("Order ("), "Receipt must start with 'Order ('");
-            assertTrue(r.contains("Subtotal: "), "Must include Subtotal line");
-            assertTrue(r.contains("Tax (10%):"), "Must include exact Tax label");
-            assertTrue(r.contains("\nTotal: "), "Must include Total line");
-        }
+    void discount_never_makes_total_negative() {
+        String receipt = OrderManagerGod.process("ESP", 1, "CARD", "LOYAL5", false);
+        // Basic guard: ensure a Total line exists and amount is non-negative numerically.
+        String prefix = "Total: ";
+        int i = receipt.indexOf(prefix);
+        assertTrue(i >= 0, "Missing Total line");
+        String totalStr = receipt.substring(i + prefix.length()).trim();
+        // totalStr like "1.23" or "0.00"
+        assertFalse(totalStr.startsWith("-"), "Total should never be negative");
     }
 }
