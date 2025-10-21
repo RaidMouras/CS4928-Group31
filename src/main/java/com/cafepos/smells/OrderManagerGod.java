@@ -7,6 +7,7 @@ import com.cafepos.pricing.DiscountPolicies;
 import com.cafepos.pricing.DiscountPolicy;
 import com.cafepos.pricing.PercentTaxPolicy;
 import com.cafepos.pricing.TaxPolicy;
+import com.cafepos.receipt.ReceiptPrinter;
 
 public class OrderManagerGod {
 
@@ -32,11 +33,11 @@ public class OrderManagerGod {
 
         Money subtotal = unitPrice.multiply(qty); // Duplicated Logic: Money math performed inline.
 
-        DiscountPolicy policy = DiscountPolicies.fromCode(discountCode);
+        DiscountPolicy dPolicy = DiscountPolicies.fromCode(discountCode);
         if (discountCode != null) { // preserve legacy side effect behavior
-            LAST_DISCOUNT_CODE = policy.code();
+            LAST_DISCOUNT_CODE = dPolicy.code();
         }
-        Money discount = policy.discount(subtotal);
+        Money discount = dPolicy.discount(subtotal);
 
         Money discounted =
                 Money.of(subtotal.asBigDecimal().subtract(discount.asBigDecimal())); // Duplicated Logic: BigDecimal math inline.
@@ -59,20 +60,18 @@ public class OrderManagerGod {
             }
         }
 
-        StringBuilder receipt = new StringBuilder();
-        // God Class & Long Method: also handles printing/presentation responsibilities.
-        receipt.append("Order (").append(recipe).append(")x").append(qty).append("\n");
-        receipt.append("Subtotal: ").append(subtotal).append("\n");
-        if (discount.asBigDecimal().signum() > 0) {
-            receipt.append("Discount: -").append(discount).append("\n"); // Duplicated Logic: formatting logic inline.
-        }
-        receipt.append(tPolicy.label(TAX_PERCENT)).append(tax).append("\n"); // Primitive Obsession: percent label from primitive.
-        receipt.append("Total: ").append(total);
-
-        String out = receipt.toString();
-        if (printReceipt) {
-            System.out.println(out); // God Class & Long Method: printing I/O in same method.
-        }
-        return out;
+        ReceiptPrinter printer = new ReceiptPrinter();
+        boolean showDiscountLine = dPolicy.printsLine(discount);
+        return printer.buildAndMaybePrint(
+                recipe,
+                qty,
+                subtotal,
+                showDiscountLine,
+                discount,
+                TAX_PERCENT, // keep exact label percent
+                tax,
+                total,
+                printReceipt
+        );
     }
 }
