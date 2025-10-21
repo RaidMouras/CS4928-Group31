@@ -3,6 +3,8 @@ package com.cafepos.smells;
 import com.cafepos.common.Money;
 import com.cafepos.factory.ProductFactory;
 import com.cafepos.catalog.Product;
+import com.cafepos.payment.Payments;
+import com.cafepos.payment.paymentStrategy;
 import com.cafepos.pricing.DiscountPolicies;
 import com.cafepos.pricing.DiscountPolicy;
 import com.cafepos.pricing.PercentTaxPolicy;
@@ -48,17 +50,8 @@ public class OrderManagerGod {
         Money tax = tPolicy.tax(discounted);
         Money total = discounted.add(tax);
 
-        if (paymentType != null) {
-            if (paymentType.equalsIgnoreCase("CASH")) {
-                System.out.println("[Cash] Customer paid " + total + "EUR"); // God Class & Long Method: payment I/O inside same method.
-            } else if (paymentType.equalsIgnoreCase("CARD")) {
-                System.out.println("[Card] Customer paid " + total + "EUR with card ****1234"); // God Class & Long Method: payment I/O.
-            } else if (paymentType.equalsIgnoreCase("WALLET")) {
-                System.out.println("[Wallet] Customer paid " + total + "EUR via wallet user-wallet-789"); // God Class & Long Method: payment I/O.
-            } else {
-                System.out.println("[UnknownPayment] " + total); // God Class & Long Method: payment I/O.
-            }
-        }
+        paymentStrategy payment = Payments.of(paymentType);
+        payment.pay(total);
 
         ReceiptPrinter printer = new ReceiptPrinter();
         boolean showDiscountLine = dPolicy.printsLine(discount);

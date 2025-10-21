@@ -26,7 +26,7 @@ public final class Order {
     public void pay(paymentStrategy strategy) {
         if (strategy == null)
             throw new IllegalArgumentException("strategy required");
-        strategy.pay(this);
+        strategy.pay(this.subtotal());
         notifyObservers("paid");
     }
 

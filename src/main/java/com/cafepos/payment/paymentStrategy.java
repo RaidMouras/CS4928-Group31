@@ -1,7 +1,7 @@
 package com.cafepos.payment;
 
-import com.cafepos.domain.Order;
+import com.cafepos.common.Money;
 
-public interface paymentStrategy { //List of variables and methods that we will use for the payment
-    void pay(Order order);
+public interface paymentStrategy {
+    void pay(Money total);
 }
