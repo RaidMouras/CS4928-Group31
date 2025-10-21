@@ -5,6 +5,8 @@ import com.cafepos.factory.ProductFactory;
 import com.cafepos.catalog.Product;
 import com.cafepos.pricing.DiscountPolicies;
 import com.cafepos.pricing.DiscountPolicy;
+import com.cafepos.pricing.PercentTaxPolicy;
+import com.cafepos.pricing.TaxPolicy;
 
 public class OrderManagerGod {
 
@@ -41,12 +43,9 @@ public class OrderManagerGod {
         if (discounted.asBigDecimal().signum() < 0) discounted =
                 Money.zero(); // Duplicated Logic: rule and guard logic inline.
 
-        var tax = Money.of(discounted.asBigDecimal()
-                .multiply(java.math.BigDecimal.valueOf(TAX_PERCENT)) // Primitive Obsession: TAX_PERCENT primitive used for rate.
-                .divide(java.math.BigDecimal.valueOf(100)));         // Duplicated Logic: percent computation scattered inline.
-        // Feature Envy / Shotgun Surgery: Tax rule embedded here; changing tax requires editing this method.
-
-        var total = discounted.add(tax); // Duplicated Logic: total calculation inline.
+        TaxPolicy tPolicy = new PercentTaxPolicy(TAX_PERCENT);
+        Money tax = tPolicy.tax(discounted);
+        Money total = discounted.add(tax);
 
         if (paymentType != null) {
             if (paymentType.equalsIgnoreCase("CASH")) {
@@ -67,7 +66,7 @@ public class OrderManagerGod {
         if (discount.asBigDecimal().signum() > 0) {
             receipt.append("Discount: -").append(discount).append("\n"); // Duplicated Logic: formatting logic inline.
         }
-        receipt.append("Tax (").append(TAX_PERCENT).append("%):").append(tax).append("\n"); // Primitive Obsession: percent label from primitive.
+        receipt.append(tPolicy.label(TAX_PERCENT)).append(tax).append("\n"); // Primitive Obsession: percent label from primitive.
         receipt.append("Total: ").append(total);
 
         String out = receipt.toString();
