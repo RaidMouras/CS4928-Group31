@@ -1,6 +1,7 @@
 package com.cafepos.receipt;
 
 import com.cafepos.common.Money;
+import com.cafepos.pricing.PricingService;
 
 public final class ReceiptPrinter {
     public String build(String recipe,
@@ -35,4 +36,15 @@ public final class ReceiptPrinter {
         if (printReceipt) System.out.println(out);
         return out;
     }
+
+    public String format(String recipe, int qty, PricingService.PricingResult pr, int taxPercent) {
+    return build(recipe,
+            qty,
+            pr.subtotal(),
+            pr.discount().asBigDecimal().signum() > 0,
+            pr.discount(),
+            taxPercent,
+            pr.tax(),
+            pr.total());
+}
 }
