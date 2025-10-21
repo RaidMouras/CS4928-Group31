@@ -3,6 +3,8 @@ package com.cafepos.smells;
 import com.cafepos.common.Money;
 import com.cafepos.factory.ProductFactory;
 import com.cafepos.catalog.Product;
+import com.cafepos.pricing.DiscountPolicies;
+import com.cafepos.pricing.DiscountPolicy;
 
 public class OrderManagerGod {
 
@@ -28,26 +30,11 @@ public class OrderManagerGod {
 
         Money subtotal = unitPrice.multiply(qty); // Duplicated Logic: Money math performed inline.
 
-        Money discount = Money.zero();
-        if (discountCode != null) { // Primitive Obsession: discountCode as raw String drives behavior.
-            if (discountCode.equalsIgnoreCase("LOYAL5")) {
-                // Primitive Obsession: magic number 5 for rate as a primitive percentage.
-                // Duplicated Logic: BigDecimal percent math scattered inline.
-                // Feature Envy / Shotgun Surgery: Discount rule embedded here; changes require editing this method.
-                discount = Money.of(subtotal.asBigDecimal()
-                        .multiply(java.math.BigDecimal.valueOf(5))
-                        .divide(java.math.BigDecimal.valueOf(100)));
-            } else if (discountCode.equalsIgnoreCase("COUPON1")) {
-                // Primitive Obsession: magic number 1.00 for fixed coupon as a primitive.
-                // Duplicated Logic: Money.of literal used inline.
-                discount = Money.of(1.00);
-            } else if (discountCode.equalsIgnoreCase("NONE")) {
-                discount = Money.zero(); // Primitive Obsession: sentinel string “NONE” to mean no discount.
-            } else {
-                discount = Money.zero(); // Primitive Obsession: unknown strings map to zero here.
-            }
-            LAST_DISCOUNT_CODE = discountCode; // Global/Static State: mutating global during processing — order-dependent and hard to test.
+        DiscountPolicy policy = DiscountPolicies.fromCode(discountCode);
+        if (discountCode != null) { // preserve legacy side effect behavior
+            LAST_DISCOUNT_CODE = policy.code();
         }
+        Money discount = policy.discount(subtotal);
 
         Money discounted =
                 Money.of(subtotal.asBigDecimal().subtract(discount.asBigDecimal())); // Duplicated Logic: BigDecimal math inline.
