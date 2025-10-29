@@ -14,40 +14,6 @@ public interface DiscountPolicy {
     String code(); // Original code identity for LAST_DISCOUNT_CODE behavior
 }
 
-/** No discount (used for "NONE" or when discountCode == null but you still want an object). */
-final class NoDiscount implements DiscountPolicy {
-    @Override
-    public Money discount(Money subtotal) { return Money.zero(); }
-    @Override
-    public boolean printsLine(Money computedDiscount) { return false; } // matches current behavior: only print when > 0
-    @Override
-    public String code() { return "NONE"; }
-}
-
-/** 5% loyalty discount (for "LOYAL5"). */
-final class Loyalty5Percent implements DiscountPolicy {
-    @Override
-    public Money discount(Money subtotal) {
-        return Money.of(subtotal.asBigDecimal()
-                .multiply(BigDecimal.valueOf(5))
-                .divide(BigDecimal.valueOf(100)));
-    }
-    @Override
-    public boolean printsLine(Money computedDiscount) { return computedDiscount.asBigDecimal().signum() > 0; }
-    @Override
-    public String code() { return "LOYAL5"; }
-}
-
-/** Fixed 1.00 coupon (for "COUPON1"). */
-final class CouponFixed1 implements DiscountPolicy {
-    @Override
-    public Money discount(Money subtotal) { return Money.of(1.00); }
-    @Override
-    public boolean printsLine(Money computedDiscount) { return computedDiscount.asBigDecimal().signum() > 0; }
-    @Override
-    public String code() { return "COUPON1"; }
-}
-
 /** Unknown codes map to zero discount and no printed discount line, but retain the code if you still store it globally. */
 final class UnknownCodeNoDiscount implements DiscountPolicy {
     private final String unknown;
