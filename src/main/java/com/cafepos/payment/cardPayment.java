@@ -9,6 +9,9 @@ public final class cardPayment implements paymentStrategy {
         if (cardNumber == null || cardNumber.isBlank()) {
             throw new IllegalArgumentException("card number required");
         }
+//        if (cardNumber.length() != 12) {
+//            throw new IllegalArgumentException("card number must be exactly 12 digits");
+//        }
         this.cardNumber = cardNumber;
     }
     @Override
