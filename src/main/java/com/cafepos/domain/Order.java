@@ -38,4 +38,11 @@ public final class Order {
             o.updated(this, eventType);
         }
     }
+    public void register(OrderObserver observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+
+
 }

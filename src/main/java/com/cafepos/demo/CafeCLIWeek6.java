@@ -1,13 +1,16 @@
 package com.cafepos.demo;
 
 import com.cafepos.catalog.Product;
+import com.cafepos.domain.LineItem;
 import com.cafepos.factory.ProductFactory;
 import com.cafepos.checkout.CheckoutService;
-
+import com.cafepos.domain.Order;
+import com.cafepos.domain.LineItem;
 import com.cafepos.payment.*;
 import com.cafepos.pricing.*;
 import com.cafepos.common.Money;
 import com.cafepos.receipt.ReceiptPrinter;
+import com.cafepos.observer.*;  // Import your observer classes here
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +35,9 @@ public final class CafeCLIWeek6 {
         System.out.println("Example: ESP+SHOT+OAT  (Espresso with extra shot and oat milk)");
         System.out.println("Type 'done' to finish adding items.\n");
 
-        // Lists for orders
         List<String> orderLines = new ArrayList<>();
         List<Integer> quantities = new ArrayList<>();
 
-        // Input orders
         while (true) {
             System.out.print("Enter product recipe (or DONE to finish): ");
             String input = scanner.nextLine().trim().toUpperCase();
@@ -64,25 +65,18 @@ public final class CafeCLIWeek6 {
             System.out.println("Added " + input + " x" + qty);
         }
 
-        // Discount code input
         System.out.print("Enter discount code (or NONE): ");
         String code = scanner.nextLine().trim().toUpperCase();
 
         DiscountPolicy discountPolicy;
         switch (code) {
-            case "LOYAL5":
-                discountPolicy = new Loyalty5Percent();
-                break;
-            case "COUPON1":
-                discountPolicy = new CouponFixed1();
-                break;
-            case "NONE":
+            case "LOYAL5": discountPolicy = new Loyalty5Percent(); break;
+            case "COUPON1": discountPolicy = new CouponFixed1(); break;
             default:
                 discountPolicy = new NoDiscount();
                 code = "NONE";
         }
 
-        // Select payment method BEFORE printing receipts
         System.out.print("\nSelect payment method (cash/card/wallet): ");
         String method = scanner.nextLine().trim().toLowerCase();
 
@@ -105,22 +99,32 @@ public final class CafeCLIWeek6 {
 
         PricingService pricingService = new PricingService(discountPolicy, new PercentTaxPolicy(10));
         ReceiptPrinter printer = new ReceiptPrinter();
-
         CheckoutService checkoutService = new CheckoutService(factory, pricingService, printer, payment, 10);
 
-        // Print receipts for all order lines
+        // Create order with ID
+        Order order = new Order(1L);
+
+        // Register observers
+        order.register(new KitchenDisplay());
+        order.register(new CustomerNotifier());
+        order.register(new DeliveryDesk());
+
+        // Add items to order
         for (int i = 0; i < orderLines.size(); i++) {
-            String lineRecipe = orderLines.get(i);
-            int lineQty = quantities.get(i);
-            String receipt = checkoutService.checkout(lineRecipe, lineQty);
+            Product product = factory.create(orderLines.get(i));
+            LineItem item = new LineItem(product, quantities.get(i));
+            order.addItem(item);
+        }
+
+        // Print receipts
+        for (int i = 0; i < orderLines.size(); i++) {
+            String receipt = checkoutService.checkout(orderLines.get(i), quantities.get(i));
             System.out.println("\n--- Receipt for Line " + (i + 1) + " ---");
             System.out.println(receipt);
         }
 
-        // Create order for payment (you can add actual line items if desired)
-        com.cafepos.domain.Order order = new com.cafepos.domain.Order(1L);
-
-
+        // Pay for the order
+        payment.pay(order.subtotal());
 
         System.out.println("\nThank you for your order!");
         scanner.close();
